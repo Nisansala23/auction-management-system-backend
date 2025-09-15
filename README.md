@@ -16,19 +16,6 @@ Implements **Entity Framework Core** (Code-First with SQL Server) and a clean te
 
 ---
 
-## 📂 Project Structure
-AuctionManagementSystem.sln → Visual Studio solution
-AuctionManagementSystem/ → Source code
-├── Controllers/ → API endpoints
-├── Data/ → DbContext
-├── Dtos/ → Clean request/response classes
-├── Models/ → EF Core entities (User, Auction, Bid, Notification)
-├── Services/ → Interfaces + Implementations
-├── Migrations/ → EF Core migration files
-├── Program.cs → Entry point
-└── appsettings.json → DB connection config
-
-text
 
 
 ---
