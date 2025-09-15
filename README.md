@@ -38,17 +38,21 @@ AuctionManagementSystem/ → Source code
    cd auction-management-system-backend
 
 2.  Build backend:
+  ```bash
     dotnet build
 
 3.Configure DB Connection → in appsettings.json:
+  ```bash
 "ConnectionStrings": {
    "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=AuctionDB;Trusted_Connection=True;TrustServerCertificate=True;"
 }
 
 4.Apply database migrations:
+  ```bash
   Update-Database
 
 5.Run backend:
+  ```bash
   dotnet run
 
 Swagger will be available at:
@@ -74,19 +78,19 @@ feature/bids-logic-notifications → Advanced (Bidding + Notifications)
 ✅ Workflow
 
 Always pull latest main:
-Bash
+  ```bash
 git checkout main
 git pull origin main
 
 
 Switch to your feature branch:
-Bash
+  ```bash
 git checkout feature/branchname
 git merge main
 
 
 After coding and testing → push:
-Bash
+  ```bash
 git add .
 git commit -m "Meaningful update message"
 git push origin feature/branchname
