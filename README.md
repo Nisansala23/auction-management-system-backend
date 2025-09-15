@@ -90,4 +90,6 @@ AuctionManagementSystem/             // Source code
   Add-Migration AddNewTable
   Update-Database
   ```
-  …then pushes the migration file → others pull and only run `Update-Database`.
+  …then pushes the migration file → others pull and only run `Update-Database`......
+
+  <!-- trigger CI -->
