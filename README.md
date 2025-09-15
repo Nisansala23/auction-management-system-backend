@@ -41,17 +41,17 @@ AuctionManagementSystem/ → Source code
   ```bash
     dotnet build
 
-3.Configure DB Connection → in appsettings.json:
+3. Configure DB Connection → in appsettings.json:
   ```bash
 "ConnectionStrings": {
    "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=AuctionDB;Trusted_Connection=True;TrustServerCertificate=True;"
 }
 
-4.Apply database migrations:
+4. Apply database migrations:
   ```bash
   Update-Database
 
-5.Run backend:
+5. Run backend:
   ```bash
   dotnet run
 
