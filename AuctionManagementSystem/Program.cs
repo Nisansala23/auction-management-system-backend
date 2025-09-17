@@ -1,4 +1,6 @@
-using AuctionManagementSystem.Data;
+﻿using AuctionManagementSystem.Data;
+using AuctionManagementSystem.Services.Implementations;
+using AuctionManagementSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register custom services with DI (interface + implementation)
+builder.Services.AddScoped<IUserService, UserService>();
+
 var app = builder.Build();
 
 // Swagger
@@ -22,6 +27,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();
