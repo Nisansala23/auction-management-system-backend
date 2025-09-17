@@ -93,3 +93,5 @@ AuctionManagementSystem/             // Source code
   …then pushes the migration file → others pull and only run `Update-Database`......
 
   <!-- trigger CI -->
+
+  <!-- trigger CI -->
