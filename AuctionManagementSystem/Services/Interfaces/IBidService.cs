@@ -1,9 +1,12 @@
-﻿using AuctionManagementSystem.Dtos;
-using AuctionManagementSystem.Models;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AuctionManagementSystem.Dtos;
 
 namespace AuctionManagementSystem.Services.Interfaces
 {
-    public class IBidService
+    public interface IBidService
     {
+        Task<IEnumerable<BidDto>> GetBidsByAuction(int auctionId);
+        Task<IEnumerable<BidDto>> GetBidsByUser(int userId);
     }
 }

@@ -1,60 +1,42 @@
-﻿using AuctionManagementSystem.Data;
-using AuctionManagementSystem.Dtos;
-using AuctionManagementSystem.Models;
+﻿using AuctionManagementSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace AuctionManagementSystem.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/bids")]
     public class BidsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IBidService _bidService;
 
-        public BidsController(ApplicationDbContext context)
+        public BidsController(IBidService bidService)
         {
-            _context = context;
+            _bidService = bidService;
         }
 
-        // GET: api/bids/auction/5  → all bids for auction 5
+        // Endpoint for "GET /api/bids/auction/{auctionId}"
         [HttpGet("auction/{auctionId}")]
-        public IActionResult GetBidsForAuction(int auctionId)
+        public async Task<IActionResult> GetBidsByAuction(int auctionId)
         {
-            var bids = _context.Bids
-                .Include(b => b.User)
-                .Where(b => b.AuctionId == auctionId)
-                .OrderByDescending(b => b.BidTime)
-                .ToList();
-
+            var bids = await _bidService.GetBidsByAuction(auctionId);
+            if (bids == null)
+            {
+                return NotFound();
+            }
             return Ok(bids);
         }
 
-        [HttpPost]
-        public IActionResult PlaceBid(PlaceBidDto dto)
+        // Endpoint for "GET /api/bids/user/{userId}"
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetBidsByUser(int userId)
         {
-            var auction = _context.Auctions.Find(dto.AuctionId);
-            if (auction == null) return NotFound("Auction not found");
-
-            if (dto.Amount <= auction.CurrentPrice)
+            var bids = await _bidService.GetBidsByUser(userId);
+            if (bids == null)
             {
-                return BadRequest("Bid must be higher than current price.");
+                return NotFound();
             }
-
-            var bid = new Bid
-            {
-                Amount = dto.Amount,
-                BidTime = DateTime.UtcNow,
-                UserId = dto.UserId,
-                AuctionId = dto.AuctionId
-            };
-
-            auction.CurrentPrice = bid.Amount;
-
-            _context.Bids.Add(bid);
-            _context.SaveChanges();
-
-            return Ok(bid);
+            return Ok(bids);
         }
     }
 }
