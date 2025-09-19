@@ -1,18 +1,30 @@
 using AuctionManagementSystem.Data;
 using AuctionManagementSystem.Services.Interfaces;
 using AuctionManagementSystem.Services.Implementations;
+using AuctionManagementSystem.Services; 
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ------------------- Add services ---------------------
 builder.Services.AddControllers();
+// Add services
+builder.Services.AddControllers()
+  .AddJsonOptions(options =>
+  {
+      options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+  });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configure EF Core with SQL Server - pick connection string from appsettings.json
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//  Register AuctionService for dependency injection
+builder.Services.AddScoped<IAuctionService, AuctionService>();
 
 // Register your services in the container (Dependency Injection)
 builder.Services.AddScoped<IAuctionService, AuctionService>();

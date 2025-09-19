@@ -1,8 +1,7 @@
-﻿using AuctionManagementSystem.Data;
-using AuctionManagementSystem.Dtos;
+﻿using AuctionManagementSystem.Dtos;
 using AuctionManagementSystem.Models;
+using AuctionManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AuctionManagementSystem.Controllers
 {
@@ -10,22 +9,18 @@ namespace AuctionManagementSystem.Controllers
     [Route("api/[controller]")]
     public class AuctionsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IAuctionService _auctionService;
 
-        public AuctionsController(ApplicationDbContext context)
+        public AuctionsController(IAuctionService auctionService)
         {
-            _context = context;
+            _auctionService = auctionService;
         }
 
         // GET: api/auctions
         [HttpGet]
         public IActionResult GetAllAuctions()
         {
-            var auctions = _context.Auctions
-                .Include(a => a.User)      // Include seller info
-                .Include(a => a.Bids)      // Include bids
-                .ToList();
-
+            var auctions = _auctionService.GetAllAuctions();
             return Ok(auctions);
         }
 
@@ -33,12 +28,9 @@ namespace AuctionManagementSystem.Controllers
         [HttpGet("{id}")]
         public IActionResult GetAuctionById(int id)
         {
-            var auction = _context.Auctions
-                .Include(a => a.User)
-                .Include(a => a.Bids)
-                .FirstOrDefault(a => a.AuctionId == id);
-
+            var auction = _auctionService.GetAuctionById(id);
             if (auction == null) return NotFound();
+
             return Ok(auction);
         }
 
@@ -46,20 +38,7 @@ namespace AuctionManagementSystem.Controllers
         [HttpPost]
         public IActionResult CreateAuction(CreateAuctionDto dto)
         {
-            var auction = new Auction
-            {
-                Title = dto.Title,
-                Description = dto.Description,
-                StartPrice = dto.StartPrice,
-                CurrentPrice = dto.StartPrice,
-                StartTime = dto.StartTime,
-                EndTime = dto.EndTime,
-                UserId = dto.UserId
-            };
-
-            _context.Auctions.Add(auction);
-            _context.SaveChanges();
-
+            var auction = _auctionService.CreateAuction(dto);
             return CreatedAtAction(nameof(GetAuctionById), new { id = auction.AuctionId }, auction);
         }
 
@@ -67,17 +46,8 @@ namespace AuctionManagementSystem.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateAuction(int id, Auction updatedAuction)
         {
-            var auction = _context.Auctions.Find(id);
+            var auction = _auctionService.UpdateAuction(id, updatedAuction);
             if (auction == null) return NotFound();
-
-            auction.Title = updatedAuction.Title;
-            auction.Description = updatedAuction.Description;
-            auction.StartPrice = updatedAuction.StartPrice;
-            auction.CurrentPrice = updatedAuction.CurrentPrice;
-            auction.StartTime = updatedAuction.StartTime;
-            auction.EndTime = updatedAuction.EndTime;
-
-            _context.SaveChanges();
 
             return Ok(auction);
         }
@@ -86,11 +56,8 @@ namespace AuctionManagementSystem.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteAuction(int id)
         {
-            var auction = _context.Auctions.Find(id);
-            if (auction == null) return NotFound();
-
-            _context.Auctions.Remove(auction);
-            _context.SaveChanges();
+            var success = _auctionService.DeleteAuction(id);
+            if (!success) return NotFound();
 
             return Ok("Auction deleted");
         }
