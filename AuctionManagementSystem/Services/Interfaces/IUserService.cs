@@ -1,14 +1,13 @@
-﻿using AuctionManagementSystem.Dtos;
-using AuctionManagementSystem.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using AuctionManagementSystem.Models;
 
 namespace AuctionManagementSystem.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<User?> GetUserById(int id); // FIX: Added '?'
-        Task<IEnumerable<User>> GetAllUsers();
-        Task<bool> UpdateUser(UserDto userDto);
+        User Register(User user);
+        List<User> GetUsers();
+        User? GetUserById(int id);
+        User? UpdateUser(int id, User updatedUser);
+        bool DeleteUser(int id);
     }
 }

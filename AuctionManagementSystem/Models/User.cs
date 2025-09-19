@@ -10,5 +10,11 @@
 
         public ICollection<Auction>? Auctions { get; set; }
         public ICollection<Bid>? Bids { get; set; }
+
+        public class UpdateUserRequest
+        {
+            public User UpdatedUser { get; set; }
+            public List<Auction> Auctions { get; set; }
+        }
     }
 }
