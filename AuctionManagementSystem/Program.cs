@@ -1,6 +1,7 @@
 using AuctionManagementSystem.Data;
+using AuctionManagementSystem.Services; 
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization; // Make sure to add this using directive
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,9 @@ builder.Services.AddSwaggerGen();
 // EF Core with SQL Server Express
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//  Register AuctionService for dependency injection
+builder.Services.AddScoped<IAuctionService, AuctionService>();
 
 var app = builder.Build();
 
