@@ -9,27 +9,22 @@
     }
   },
   "profiles": {
-<<<<<<< HEAD
-=======
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5200", // changed from 5218
+      "applicationUrl": "http://localhost:5200",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
->>>>>>> origin/feature/auction-crud
     "https": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-<<<<<<< HEAD
       "applicationUrl": "https://localhost:7077",
-
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -38,7 +33,6 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "launchUrl": "swagger",
->>>>>>> origin/feature/auction-crud
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

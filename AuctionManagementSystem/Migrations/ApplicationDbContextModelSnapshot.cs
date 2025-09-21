@@ -151,7 +151,7 @@ namespace AuctionManagementSystem.Migrations
                     b.HasOne("AuctionManagementSystem.Models.User", "User")
                         .WithMany("Auctions")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");

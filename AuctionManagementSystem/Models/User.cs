@@ -3,18 +3,18 @@
     public class User
     {
         public int UserId { get; set; }
+
         public string Username { get; set; } = string.Empty;
+
         public string Email { get; set; } = string.Empty;
+
         public string PasswordHash { get; set; } = string.Empty;
+
         public string Role { get; set; } = string.Empty;
 
-        public ICollection<Auction>? Auctions { get; set; }
-        public ICollection<Bid>? Bids { get; set; }
+        // Navigation properties - initialized to avoid CS8618 warnings
+        public ICollection<Auction> Auctions { get; set; } = new List<Auction>();
 
-        public class UpdateUserRequest
-        {
-            public User UpdatedUser { get; set; }
-            public List<Auction> Auctions { get; set; }
-        }
+        public ICollection<Bid> Bids { get; set; } = new List<Bid>();
     }
 }

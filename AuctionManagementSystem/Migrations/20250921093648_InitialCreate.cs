@@ -49,7 +49,29 @@ namespace AuctionManagementSystem.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    NotificationId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.NotificationId);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,6 +116,11 @@ namespace AuctionManagementSystem.Migrations
                 name: "IX_Bids_UserId",
                 table: "Bids",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -101,6 +128,9 @@ namespace AuctionManagementSystem.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Bids");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "Auctions");

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuctionManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250914094527_InitialCreate")]
+    [Migration("20250921093648_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -92,6 +92,34 @@ namespace AuctionManagementSystem.Migrations
                     b.ToTable("Bids");
                 });
 
+            modelBuilder.Entity("AuctionManagementSystem.Models.Notification", b =>
+                {
+                    b.Property<int>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("NotificationId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("AuctionManagementSystem.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -126,7 +154,7 @@ namespace AuctionManagementSystem.Migrations
                     b.HasOne("AuctionManagementSystem.Models.User", "User")
                         .WithMany("Auctions")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -147,6 +175,17 @@ namespace AuctionManagementSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("Auction");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AuctionManagementSystem.Models.Notification", b =>
+                {
+                    b.HasOne("AuctionManagementSystem.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
