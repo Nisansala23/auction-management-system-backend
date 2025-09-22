@@ -8,5 +8,7 @@ namespace AuctionManagementSystem.Services.Interfaces
     {
         Task<IEnumerable<BidDto>> GetBidsByAuction(int auctionId);
         Task<IEnumerable<BidDto>> GetBidsByUser(int userId);
+
+        Task<BidDto> PlaceBidAsync(PlaceBidDto dto);
     }
 }

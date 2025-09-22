@@ -1,6 +1,7 @@
 ﻿using AuctionManagementSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using AuctionManagementSystem.Dtos;
 
 namespace AuctionManagementSystem.Controllers
 {
@@ -20,10 +21,6 @@ namespace AuctionManagementSystem.Controllers
         public async Task<IActionResult> GetBidsByAuction(int auctionId)
         {
             var bids = await _bidService.GetBidsByAuction(auctionId);
-            if (bids == null)
-            {
-                return NotFound();
-            }
             return Ok(bids);
         }
 
@@ -32,11 +29,23 @@ namespace AuctionManagementSystem.Controllers
         public async Task<IActionResult> GetBidsByUser(int userId)
         {
             var bids = await _bidService.GetBidsByUser(userId);
-            if (bids == null)
-            {
-                return NotFound();
-            }
             return Ok(bids);
         }
+        // New endpoint for placing bids
+        [HttpPost("place")]
+        public async Task<IActionResult> PlaceBid([FromBody] PlaceBidDto dto)
+        {
+            try
+            {
+                var bid = await _bidService.PlaceBidAsync(dto);
+                return Ok(bid);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+        
+        
     }
 }
