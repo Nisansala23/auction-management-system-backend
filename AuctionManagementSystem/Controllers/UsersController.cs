@@ -3,6 +3,11 @@ using AuctionManagementSystem.Dtos;
 using AuctionManagementSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization; // <-- NEW
 
 namespace AuctionManagementSystem.Controllers
 {
@@ -11,10 +16,13 @@ namespace AuctionManagementSystem.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration; // <-- NEW
 
-        public UsersController(ApplicationDbContext context)
+        // The constructor now also receives IConfiguration via Dependency Injection.
+        public UsersController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration; // <-- NEW
         }
 
         // ---------------- REGISTER ----------------
@@ -62,6 +70,30 @@ namespace AuctionManagementSystem.Controllers
                 return Unauthorized("❌ Invalid username or password");
             }
 
+            // --- NEW: Token Generation Logic ---
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+
+            // Define the claims (payload) for the token
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(7), // Token expires in 7 days
+                SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+            // --- End of New Logic ---
+
             var userDto = new UserDto
             {
                 UserId = user.UserId,
@@ -72,6 +104,7 @@ namespace AuctionManagementSystem.Controllers
             return Ok(new
             {
                 Message = "✅ Login successful",
+                Token = tokenString, // <-- Return the JWT
                 User = userDto
             });
         }
@@ -79,6 +112,7 @@ namespace AuctionManagementSystem.Controllers
         // ---------------- GET ALL USERS ----------------
         // GET: api/users
         [HttpGet]
+        [Authorize] // <-- NEW: This endpoint is now protected
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
         {
             var users = await _context.Users
@@ -96,6 +130,7 @@ namespace AuctionManagementSystem.Controllers
         // ---------------- GET USER BY ID ----------------
         // GET: api/users/{id}
         [HttpGet("{id}")]
+        [Authorize] // <-- NEW: This endpoint is now protected
         public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
             var user = await _context.Users.FindAsync(id);
@@ -112,6 +147,7 @@ namespace AuctionManagementSystem.Controllers
         // ---------------- UPDATE USER ----------------
         // PUT: api/users/{id}
         [HttpPut("{id}")]
+        [Authorize] // <-- NEW: This endpoint is now protected
         public async Task<IActionResult> UpdateUser(int id, UpdateUserDto dto)
         {
             var user = await _context.Users.FindAsync(id);
@@ -134,6 +170,7 @@ namespace AuctionManagementSystem.Controllers
         // ---------------- DELETE USER ----------------
         // DELETE: api/users/{id}
         [HttpDelete("{id}")]
+        [Authorize] // <-- NEW: This endpoint is now protected
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _context.Users.FindAsync(id);

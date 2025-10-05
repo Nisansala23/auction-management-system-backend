@@ -1,8 +1,9 @@
-using AuctionManagementSystem.Data;
+﻿using AuctionManagementSystem.Data;
 using AuctionManagementSystem.Dtos;
 using AuctionManagementSystem.Models;
 using AuctionManagementSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,60 +19,107 @@ namespace AuctionManagementSystem.Services.Implementations
             _context = context;
         }
 
-        // ---------------- Get Methods ----------------
-        public async Task<Auction?> GetAuctionByIdAsync(int id)
+        // Helper method to convert an Auction Model to an AuctionDto
+        private AuctionDto ToDto(Auction model)
         {
-            return await _context.Auctions
+            // Calculate CurrentPrice: highest bid or start price
+            var currentPrice = model.Bids != null && model.Bids.Any()
+                             ? model.Bids.Max(b => b.Amount)
+                             : model.StartPrice;
+
+            return new AuctionDto
+            {
+                AuctionId = model.AuctionId,
+                // 🛑 FIX: Use ?? string.Empty to prevent null reference warnings/errors
+                Title = model.Title ?? string.Empty,
+                Description = model.Description ?? string.Empty,
+                ImageUrl = model.ImageUrl ?? string.Empty,
+                StartPrice = model.StartPrice,
+                CurrentPrice = currentPrice,
+                StartTime = model.StartTime,
+                EndTime = model.EndTime,
+                UserId = model.UserId
+            };
+        }
+
+        // ---------------- Get Methods ----------------
+
+        // FIX: Method signature changed to return Task<AuctionDto?> and includes mapping
+        public async Task<AuctionDto?> GetAuctionByIdAsync(int id)
+        {
+            var auction = await _context.Auctions
                 .Include(a => a.User)
                 .Include(a => a.Bids)
                 .FirstOrDefaultAsync(a => a.AuctionId == id);
+
+            if (auction == null) return null;
+
+            return ToDto(auction);
         }
 
-        public async Task<IEnumerable<Auction>> GetAllAuctionsAsync()
+        // FIX: Method signature changed to return Task<IEnumerable<AuctionDto>> and includes mapping
+        public async Task<IEnumerable<AuctionDto>> GetAllAuctionsAsync()
         {
-            return await _context.Auctions
-                .Include(a => a.User)
+            var auctions = await _context.Auctions
                 .Include(a => a.Bids)
                 .ToListAsync();
+
+            return auctions.Select(ToDto).ToList();
         }
 
         // ---------------- Create Auction ----------------
-        public async Task<Auction> CreateAuctionAsync(CreateAuctionDto dto, int userId)
+
+        // FIX: Method signature changed to return Task<AuctionDto> and includes mapping
+        public async Task<AuctionDto> CreateAuctionAsync(CreateAuctionDto dto, int userId)
         {
             var auction = new Auction
             {
                 Title = dto.Title,
                 Description = dto.Description,
+                // Assumes ImageUrl is correctly resolved in the Controller/DTO
+                ImageUrl = dto.ImageUrl,
                 StartPrice = dto.StartPrice,
                 CurrentPrice = dto.StartPrice,
-                StartTime = dto.StartTime,
+                StartTime = DateTime.UtcNow,
                 EndTime = dto.EndTime,
                 UserId = userId
             };
 
             _context.Auctions.Add(auction);
             await _context.SaveChangesAsync();
-            return auction;
+
+            return ToDto(auction);
         }
 
         // ---------------- Update Auction ----------------
-        public async Task<Auction?> UpdateAuctionAsync(int id, Auction updatedAuction)
+
+        // FIX: Method signature changed to accept UpdateAuctionDto and return Task<AuctionDto?>
+        public async Task<AuctionDto?> UpdateAuctionAsync(int id, UpdateAuctionDto dto)
         {
-            var auction = await _context.Auctions.FindAsync(id);
+            // Ensure Bids are included to accurately calculate the current price in ToDto
+            var auction = await _context.Auctions
+                .Include(a => a.Bids)
+                .FirstOrDefaultAsync(a => a.AuctionId == id);
+
             if (auction == null) return null;
 
-            auction.Title = updatedAuction.Title;
-            auction.Description = updatedAuction.Description;
-            auction.StartPrice = updatedAuction.StartPrice;
-            auction.CurrentPrice = updatedAuction.CurrentPrice;
-            auction.StartTime = updatedAuction.StartTime;
-            auction.EndTime = updatedAuction.EndTime;
+            // Apply updates from the DTO
+            if (dto.Title != null) auction.Title = dto.Title;
+            if (dto.Description != null) auction.Description = dto.Description;
+            if (dto.ImageUrl != null) auction.ImageUrl = dto.ImageUrl;
+
+            // Assuming EndTime is mandatory and provided
+            auction.EndTime = dto.EndTime;
+
+            // Note: StartPrice/CurrentPrice are typically NOT updated here.
 
             await _context.SaveChangesAsync();
-            return auction;
+
+            return ToDto(auction);
         }
 
         // ---------------- Delete Auction ----------------
+
         public async Task<bool> DeleteAuctionAsync(int id)
         {
             var auction = await _context.Auctions.FindAsync(id);

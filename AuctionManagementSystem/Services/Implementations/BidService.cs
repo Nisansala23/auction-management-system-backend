@@ -6,14 +6,14 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using AuctionManagementSystem.Hubs;
 
-
 namespace AuctionManagementSystem.Services.Implementations
 {
     public class BidService : IBidService
     {
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<BidHub> _hubContext;
-        public BidService(ApplicationDbContext context,IHubContext<BidHub> hubContext)
+
+        public BidService(ApplicationDbContext context, IHubContext<BidHub> hubContext)
         {
             _context = context;
             _hubContext = hubContext;
@@ -34,7 +34,7 @@ namespace AuctionManagementSystem.Services.Implementations
                     Username = b.User != null ? b.User.Username : null,
                     AuctionTitle = b.Auction != null ? b.Auction.Title : null
                 })
-                .ToListAsync(); // Use ToListAsync() for async operation
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<BidDto>> GetBidsByUser(int userId)
@@ -52,10 +52,11 @@ namespace AuctionManagementSystem.Services.Implementations
                     Username = b.User != null ? b.User.Username : null,
                     AuctionTitle = b.Auction != null ? b.Auction.Title : null
                 })
-                .ToListAsync(); // Use ToListAsync() for async operation
+                .ToListAsync();
         }
-        
-        public async Task<BidDto> PlaceBidAsync(PlaceBidDto dto)
+
+        // Updated method signature to accept userId from the controller
+        public async Task<BidDto> PlaceBidAsync(PlaceBidDto dto, int userId)
         {
             // 1. Validate auction
             var auction = await _context.Auctions
@@ -67,8 +68,8 @@ namespace AuctionManagementSystem.Services.Implementations
             if (dto.Amount <= auction.CurrentPrice || dto.Amount <= auction.StartPrice)
                 throw new Exception("Bid must be higher than current price.");
 
-            // 2. Validate user
-            var user = await _context.Users.FindAsync(dto.UserId);
+            // 2. Validate user using the userId passed from the controller
+            var user = await _context.Users.FindAsync(userId);
             if (user == null) throw new Exception("User not found.");
 
             // 3. Create bid
@@ -76,7 +77,7 @@ namespace AuctionManagementSystem.Services.Implementations
             {
                 Amount = dto.Amount,
                 AuctionId = auction.AuctionId,
-                UserId = dto.UserId,
+                UserId = userId, // <-- Use the userId from the parameter, not the DTO
                 BidTime = DateTime.UtcNow
             };
 
@@ -101,6 +102,5 @@ namespace AuctionManagementSystem.Services.Implementations
 
             return bidDto;
         }
-        
     }
 }
